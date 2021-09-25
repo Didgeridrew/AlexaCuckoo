@@ -1,0 +1,64 @@
+#####################################################################
+# Modified for Alexa from: https://github.com/CCOSTAN/Home-AssistantConfig
+
+## Checks that target echo devices are set to volume level 0.3 and sets them if needed.
+## Plays cuckoos for the hour number at each hour and 1 cuckoo on the half hour.
+
+## Mp3 files must be stored in your Home Assistant www folder. 
+## Alter the folder addresses in the "variables" section to suit your situation
+## Video describing how to use custom Mp3 with Alexa: https://www.youtube.com/watch?v=ZJlH6k9PY4I&t=18s
+#####################################################################
+
+#automations.yaml
+
+- alias: Alexa - Notify - Cuckoo Clock
+  trigger:
+  - platform: time_pattern
+    minutes: '30'
+  - platform: time_pattern
+    minutes: '0'
+  condition:
+  - condition: time
+    after: '08:59:00'
+    before: '20:31:00'
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: group.family
+      state: home
+    - condition: state
+      entity_id: input_boolean.guest_mode
+      state: 'on'
+  action:
+  - choose:
+    - conditions: >-
+      {% set ns = namespace(volumes = []) %}
+      {% for s in ['media_player.living_room_dot', 'media_player.basement_dot'] %}
+      {% set x = is_state_attr(s, 'volume_level', 0.3) %}
+      {% set ns.volumes = ns.volumes + ['{}'.format(x)] %}
+      {% endfor %}
+      {{ 'False' in ns.volumes }}"
+      sequence:
+      - service: media_player.volume_set
+        data:
+          entity_id:
+          - media_player.living_room_dot
+          - media_player.basement_dot
+          volume_level: 0.3
+  - delay: 3
+  - service: notify.alexa_media
+    data:
+      message: '{{cuckoos}}'
+      target:
+      - media_player.basement_dot
+      - media_player.living_room_dot
+      data:
+        type: tts
+  mode: restart
+  variables:
+    cuckoos: >-
+      {% if now().strftime(\"%M\")|int == 30 %}
+      {{"<audio src='https://***YOUR_IP_HERE***/local/mp3/config-sounds-cuckoo-clock-01.mp3'/>\"}}
+      {% else %}
+      {{"<audio src='https://***YOUR_IP_HERE***/local/mp3/config-sounds-cuckoo-clock-\" + now().strftime(\"%I\") + \".mp3'/>\"}}
+      {% endif %}"
