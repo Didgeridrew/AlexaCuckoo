@@ -5,6 +5,7 @@ This automation relies on the [Alexa Media Player](https://github.com/custom-com
 
 Modified for Alexa from [@CCOSTAN's CucKoo_Clock](https://github.com/CCOSTAN/Home-AssistantConfig/blob/master/config/automation/System/CucKoo_Clock.yaml)
 
+Audio files converted using https://www.jovo.tech/audio-converter
 
 More Info and Videos: 
   
