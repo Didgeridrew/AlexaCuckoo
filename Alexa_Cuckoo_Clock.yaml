@@ -15,6 +15,7 @@
   trigger:
   - platform: time_pattern
     minutes: '30'
+    id: half
   - platform: time_pattern
     minutes: '0'
   condition:
@@ -31,13 +32,10 @@
       state: 'on'
   action:
   - choose:
-    - conditions: >-
-        {% set ns = namespace(volumes = []) %}
-        {% for s in ['media_player.living_room_dot', 'media_player.basement_dot'] %}
-        {% set x = is_state_attr(s, 'volume_level', 0.3) %}
-        {% set ns.volumes = ns.volumes + ['{}'.format(x)] %}
-        {% endfor %}
-        {{ 'False' in ns.volumes }}
+    - conditions: >
+        {{ (expand('media_player.amanda_s_living_room_dot', 'media_player.kitchen_dot')
+        | map(attribute='attributes.volume_level') | map('float', 0)
+        | select('ne', 0.3) | list | count) | bool }}
       sequence:
         - service: media_player.volume_set
           data:
@@ -50,14 +48,14 @@
     data:
       message: '{{cuckoos}}'
       target:
-      - media_player.basement_dot
-      - media_player.living_room_dot
+        - media_player.basement_dot
+        - media_player.living_room_dot
       data:
         type: tts
   mode: restart
   variables:
     cuckoos: >-
-      {% if now().strftime(\"%M\")|int == 30 %}
+      {% if trigger.id == 'half' %}
       {{"<audio src='https://***YOUR_IP_HERE***/local/mp3/config-sounds-cuckoo-clock-01.mp3'/>\"}}
       {% else %}
       {{"<audio src='https://***YOUR_IP_HERE***/local/mp3/config-sounds-cuckoo-clock-\" + now().strftime(\"%I\") + \".mp3'/>\"}}
