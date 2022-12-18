@@ -33,7 +33,7 @@
   action:
   - choose:
     - conditions: >
-        {{ (expand('media_player.amanda_s_living_room_dot', 'media_player.kitchen_dot')
+        {{ (expand('media_player.living_room_dot', 'media_player.kitchen_dot')
         | map(attribute='attributes.volume_level') | map('float', 0)
         | select('ne', 0.3) | list | count) | bool }}
       sequence:
@@ -48,7 +48,7 @@
     data:
       message: '{{cuckoos}}'
       target:
-        - media_player.basement_dot
+        - media_player.kitchen_dot
         - media_player.living_room_dot
       data:
         type: tts
