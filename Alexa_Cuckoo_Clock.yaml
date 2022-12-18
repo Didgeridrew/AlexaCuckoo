@@ -32,12 +32,12 @@
   action:
   - choose:
     - conditions: >-
-      {% set ns = namespace(volumes = []) %}
-      {% for s in ['media_player.living_room_dot', 'media_player.basement_dot'] %}
-      {% set x = is_state_attr(s, 'volume_level', 0.3) %}
-      {% set ns.volumes = ns.volumes + ['{}'.format(x)] %}
-      {% endfor %}
-      {{ 'False' in ns.volumes }}"
+        {% set ns = namespace(volumes = []) %}
+        {% for s in ['media_player.living_room_dot', 'media_player.basement_dot'] %}
+        {% set x = is_state_attr(s, 'volume_level', 0.3) %}
+        {% set ns.volumes = ns.volumes + ['{}'.format(x)] %}
+        {% endfor %}
+        {{ 'False' in ns.volumes }}
       sequence:
       - service: media_player.volume_set
         data:
@@ -61,4 +61,4 @@
       {{"<audio src='https://***YOUR_IP_HERE***/local/mp3/config-sounds-cuckoo-clock-01.mp3'/>\"}}
       {% else %}
       {{"<audio src='https://***YOUR_IP_HERE***/local/mp3/config-sounds-cuckoo-clock-\" + now().strftime(\"%I\") + \".mp3'/>\"}}
-      {% endif %}"
+      {% endif %}
