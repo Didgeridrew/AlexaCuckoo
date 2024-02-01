@@ -15,9 +15,9 @@
   trigger:
   - platform: time_pattern
     minutes: '30'
-    id: half
   - platform: time_pattern
     minutes: '0'
+    id: hour
   condition:
   - condition: time
     after: '08:59:00'
@@ -31,31 +31,31 @@
       entity_id: input_boolean.guest_mode
       state: 'on'
   action:
+  - variables:
+      echo_devices:
+        - media_player.living_room_dot
+        - media_player.kitchen_dot
   - choose:
     - conditions: >
-        {{ (expand('media_player.living_room_dot', 'media_player.kitchen_dot')
+        {{ (expand(echo_devices)
         | map(attribute='attributes.volume_level') | map('float', 0)
         | select('ne', 0.3) | list | count) | bool }}
       sequence:
         - service: media_player.volume_set
           data:
-            entity_id:
-              - media_player.living_room_dot
-              - media_player.basement_dot
+            entity_id: "{{ echo_devices }}"
             volume_level: 0.3
   - delay: 3
   - service: notify.alexa_media
     data:
-      message: '{{cuckoos}}'
-      target:
-        - media_player.kitchen_dot
-        - media_player.living_room_dot
+      message: "{{cuckoos}}"
+      target: "{{ echo_devices }}"
       data:
         type: tts
   mode: restart
   variables:
     cuckoos: >-
-      {% if trigger.id == 'half' %}
+      {% if trigger.id != 'hour' %}
       {{"<audio src='https://***YOUR_IP_HERE***/local/mp3/config-sounds-cuckoo-clock-01.mp3'/>\"}}
       {% else %}
       {{"<audio src='https://***YOUR_IP_HERE***/local/mp3/config-sounds-cuckoo-clock-\" + now().strftime(\"%I\") + \".mp3'/>\"}}
