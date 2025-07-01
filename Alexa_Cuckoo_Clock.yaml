@@ -36,7 +36,7 @@
         - media_player.living_room_dot
         - media_player.kitchen_dot
   - choose:
-    - conditions: >
+    - conditions: |
         {{ (expand(echo_devices)
         | map(attribute='attributes.volume_level') | map('float', 0)
         | select('ne', 0.3) | list | count) | bool }}
@@ -48,15 +48,19 @@
   - delay: 3
   - service: notify.alexa_media
     data:
-      message: "{{cuckoos}}"
+      message: "{{message}}"
       target: "{{ echo_devices }}"
       data:
         type: tts
   mode: restart
   variables:
-    cuckoos: >-
+    sound_type: |
+      {# This can be "cuckoo" or "coqui" based on the sound files provided in this git or you can use any other sounds you want as long as they follow the naming convention #}
+      cuckoo
+    message: |
+      {% set prefix = %}
       {% if trigger.id != 'hour' %}
-      {{"<audio src='https://***YOUR_IP_HERE***/local/mp3/config-sounds-cuckoo-clock-01.mp3'/>\"}}
+        {{"<audio src='https://***YOUR_IP_HERE***/local/mp3/"~sound_type~"-clock-half.mp3'/>\"}}
       {% else %}
-      {{"<audio src='https://***YOUR_IP_HERE***/local/mp3/config-sounds-cuckoo-clock-\" + now().strftime(\"%I\") + \".mp3'/>\"}}
+        {{"<audio src='https://***YOUR_IP_HERE***/local/mp3/"~sound_type~"-clock-\" + now().strftime(\"%I\") + \".mp3'/>\"}}
       {% endif %}
